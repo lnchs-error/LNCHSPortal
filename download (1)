@@ -1,0 +1,7 @@
+# Secrets and local files - never commit these
+config.php
+diag.php
+.env
+*.zip
+.DS_Store
+Thumbs.db

@@ -1,0 +1,41 @@
+# yaml-language-server: $schema=https://storage.googleapis.com/coderabbit_public_assets/schema.v2.json
+language: "en-US"
+tone_instructions: "Be direct and practical. This is a school project run by a student developer on free shared hosting, so explain why something matters and show a small fix."
+reviews:
+  profile: "assertive"
+  high_level_summary: true
+  poem: false
+  path_filters:
+    - "!errorcode/**"
+    - "!**/*.min.*"
+  instructions: |
+    Plain PHP 8 with mysqli and no framework, deployed on InfinityFree free hosting (Apache, MariaDB, no cron, no outbound SMTP).
+    The data belongs to minors (names, LRN, birthdates, attendance), so security and privacy matter most. Prioritise:
+    SQL injection, XSS, CSRF, auth and role checks, session handling, rate limiting, information leaks, and Data Privacy Act (Philippines) concerns.
+    Do not suggest adding Composer or a framework.
+  path_instructions:
+    - path: "**/*.php"
+      instructions: |
+        Check every request path for: prepared statements with correct bind types, htmlspecialchars output escaping (use e()), csrf_verify() on every POST,
+        require_login()/require_staff() before any data access, and that roles are never trusted from the client.
+        Flag any query built by string concatenation, any unescaped output, any missing authorization check, and any secret in code.
+        Also look for logic errors, race conditions (duplicate attendance rows, double sends) and unhandled false returns from prepare() or get_result().
+    - path: "config.example.php"
+      instructions: |
+        This is the shared bootstrap (database, sessions, CSRF, rate limiting, remember-me tokens). Review it with extra care for session fixation, cookie flags,
+        token storage and timing-safe comparisons. The real config.php is git-ignored and holds the secrets.
+    - path: "kiosk.php"
+      instructions: |
+        Gate kiosk endpoint: authenticated by a device cookie, accepts card/tag scans and LRN or employee number + PIN. Review PIN lockout, throttling, enumeration
+        resistance, the offline replay endpoint (duplicate protection, timestamp validation) and any way to record attendance for someone else.
+    - path: "sw.js"
+      instructions: "Service worker that only caches kiosk.php and bg.png so the kiosk page reopens offline. Check it never caches responses with private data or error pages."
+    - path: ".htaccess"
+      instructions: "Apache config for shared hosting. Mistakes here can return a 500 for the whole site, so flag anything that depends on modules that may be missing."
+    - path: "setup.php"
+      instructions: "One-time installer that must be deleted after use. Check it is idempotent, key-protected and safe to run twice."
+  auto_review:
+    enabled: true
+    drafts: false
+chat:
+  auto_reply: true
